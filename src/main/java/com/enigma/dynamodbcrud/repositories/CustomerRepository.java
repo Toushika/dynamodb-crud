@@ -1,17 +1,15 @@
 package com.enigma.dynamodbcrud.repositories;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBSaveExpression;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.dynamodbv2.model.ExpectedAttributeValue;
 import com.enigma.dynamodbcrud.entitties.Customer;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@RequiredArgsConstructor
 public class CustomerRepository {
-    @Autowired
-    private DynamoDBMapper dynamoDBMapper;
+
+    private final DynamoDBMapper dynamoDBMapper;
 
     public Customer saveCustomer(Customer customer) {
         dynamoDBMapper.save(customer);
@@ -27,13 +25,13 @@ public class CustomerRepository {
         return "Customer Id : " + customerId + " Deleted!";
     }
 
-    public String updateCustomer(String customerId, Customer customer) {
-        dynamoDBMapper.save(customer,
-                new DynamoDBSaveExpression()
-                        .withExpectedEntry("customerId",
-                                new ExpectedAttributeValue(
-                                        new AttributeValue().withS(customerId)
-                                )));
-        return customerId;
+    public Customer updateCustomer(String customerId, Customer customer) {
+        Customer finalCustomer = getCustomerById(customerId);
+        finalCustomer.setFirstName(customer.getFirstName());
+        finalCustomer.setLastName(customer.getLastName());
+        finalCustomer.setEmail(customer.getEmail());
+        finalCustomer.setAddress(customer.getAddress());
+        dynamoDBMapper.save(finalCustomer);
+        return finalCustomer;
     }
 }
